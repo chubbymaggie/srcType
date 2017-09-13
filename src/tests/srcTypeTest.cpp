@@ -71,20 +71,21 @@ void TestPrimitiveTypes(){
             std::cerr<<"Type1: "<< nameprofile.front().nameOfType<<std::endl;
             assert(nameprofile.front().nameOfType == "int");
             assert(typeDict.IsPrimitive(nameprofile.front().nameOfType) == true);
+            std::cerr<<nameprofile.front().sigdata->name<<std::endl;
         }
         {
             auto nameprofile = typeDict.FindVariable("v");
             std::cerr<<"Type2: "<< nameprofile.front().nameOfType<<std::endl;
             assert(nameprofile.front().nameOfType == "int");
             assert(typeDict.IsPrimitive(nameprofile.front().nameOfType) == true);
-            assert(nameprofile.front().isConst);
+            assert(nameprofile.front().isConstValue);
         }
         {
             auto nameprofile = typeDict.FindVariable("e");
             std::cerr<<"Type3: "<< nameprofile.front().nameOfType<<std::endl;
             assert(nameprofile.front().nameOfType == "int"); 
             assert(typeDict.IsPrimitive(nameprofile.front().nameOfType) == true);
-            assert(nameprofile.front().isConst);
+            assert(nameprofile.front().isConstValue);
         }
         {
             auto nameprofile = typeDict.FindVariable("array");
@@ -117,14 +118,14 @@ void TestComplexType(){
             std::cerr<<"Type2: "<< nameprofile.front().nameOfType<<std::endl;
             assert(nameprofile.front().nameOfType == "Object"
                    && typeDict.IsPrimitive(nameprofile.front().nameOfType) == false
-                   && nameprofile.front().isConst);
+                   && nameprofile.front().isConstValue);
         }
         {
             auto nameprofile = typeDict.FindVariable("caa34");
             std::cerr<<"Type3: "<< nameprofile.front().nameOfType<<std::endl;
             assert(nameprofile.front().nameOfType == "Object"
                    && typeDict.IsPrimitive(nameprofile.front().nameOfType) == false
-                   && nameprofile.front().isConst);
+                   && nameprofile.front().isConstValue);
         }
     }catch(SAXError e){
         std::cerr<<"ERROR: "<<e.message;
@@ -184,7 +185,7 @@ void TestNamespacedComplexType(){
             std::cerr<<"Type2: "<< nameprofile.front().nameOfType<<std::endl;
             assert(nameprofile.front().nameOfType == "Object"
                    && typeDict.IsPrimitive(nameprofile.front().nameOfType) == false
-                   && nameprofile.front().isConst
+                   && nameprofile.front().isConstValue
                    && nameprofile.front().namespaces.front() == "std");
         }
         {
@@ -192,7 +193,7 @@ void TestNamespacedComplexType(){
             std::cerr<<"Type3: "<< nameprofile.front().nameOfType<<std::endl;
             assert(nameprofile.front().nameOfType == "Object"
                    && typeDict.IsPrimitive(nameprofile.front().nameOfType) == false
-                   && nameprofile.front().isConst
+                   && nameprofile.front().isConstValue
                    && nameprofile.front().namespaces.front() == "std");
         }
     }catch(SAXError e){
@@ -274,12 +275,11 @@ void TestWritableFind(){
     try{
         typeDict.SetContext("testsrcType.cpp", "main");
         {
-            auto nameprofile = typeDict.FindIdentifierWrite("c", "main", "testsrcType.cpp");
-            std::cerr<<"Type1WRITEABLE: "<< nameprofile->front().nameOfType<<std::endl;
+            auto nameprofile = typeDict.FindIdentifierWrite("c", "main", "", "testsrcType.cpp");
             assert(nameprofile->front().nameOfType == "int");
             assert(typeDict.IsPrimitive(nameprofile->front().nameOfType) == true);
             nameprofile->front().nameOfType = "string";
-            auto nameprofile2 = typeDict.FindIdentifierWrite("c", "main", "testsrcType.cpp");
+            auto nameprofile2 = typeDict.FindIdentifierWrite("c", "main", "", "testsrcType.cpp");
             assert(nameprofile2->front().nameOfType == "string");
         }
     }catch(SAXError e){
