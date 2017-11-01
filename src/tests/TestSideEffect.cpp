@@ -43,7 +43,8 @@ class TestSideEffect : public srcSAXEventDispatch::PolicyDispatcher, public srcS
         ~TestSideEffect(){}
         TestSideEffect(std::initializer_list<srcSAXEventDispatch::PolicyListener *> listeners = {}) : srcSAXEventDispatch::PolicyDispatcher(listeners){}
         void Notify(const PolicyDispatcher * policy, const srcSAXEventDispatch::srcSAXEventContext & ctx) override {}
-		void RunTest(std::vector<DeclData> testvec){
+
+		void RunTestVar(std::vector<DeclData> testvec){
 			auto id = testvec.at(0);
 			if(id.nameOfIdentifier == "j"){
 				assert(id.hasSideEffect == true);
@@ -70,6 +71,27 @@ class TestSideEffect : public srcSAXEventDispatch::PolicyDispatcher, public srcS
 				assert(id.hasSideEffect == false);
 			}
 		}
+		void RunTestFunc(std::vector<SignatureData> testvec){
+			auto id = testvec.at(0);
+			if(id.name == "foo2"){
+				assert(id.hasSideEffect == false);
+			}
+			if(id.name == "bar"){
+				assert(id.hasSideEffect == true);
+			}
+			if(id.name == "foobar"){
+				assert(id.hasSideEffect == false);
+			}
+			if(id.name == "barfoo"){
+				assert(id.hasSideEffect == true);
+			}
+			if(id.name == "barfoo2"){
+				assert(id.hasSideEffect == true);
+			}
+			if(id.name == "barfoo3"){
+				assert(id.hasSideEffect == false);
+			}
+		}
     protected:
         void * DataInner() const override {
             return (void*)0; //To silence the warning
@@ -82,6 +104,8 @@ int main(int argc, char** filename){
 	"class object{\n\
 		int x;\n\
 		Foo y;\n\
+		Obj blee;\n\
+		Obj blee2;\n\
 		std::string foo(int i, double j, const obj* r, Object q){\n\
 			object y2 = x;\n\
 			r = 0;\n\
@@ -93,7 +117,13 @@ int main(int argc, char** filename){
 			foo(abc+doreme);\n\
 			return y;\n\
 		}\n\
-	};";
+		Object barfoo2(){blee = 3;}\n\
+		Object barfoo3()const{blee2 = 3; return blee2;}\n\
+	};\n\
+    int foo2(int ab) const{return ab;}\n\
+    int bar(int pop){pop = 0; return pop;}\n\
+    Object foobar(int wop)const{return wop;}\n\
+    Object barfoo(){obj a = 5; return a;}";
 
 	std::string srcmlstr = StringToSrcML(codestr);
 	auto dictionary = new srcTypeNS::srcType(srcmlstr, false);
@@ -105,11 +135,14 @@ int main(int argc, char** filename){
     srcSAXController control(srcmlstr);
     srcSAXEventDispatch::srcSAXEventDispatcher<> handler {sepolicy};
     control.parse(&handler); //Start parsing
-/*
+
     for(auto data : dictionary->data.variableMap){
-    	setest.RunTest(data.second);
+    	setest.RunTestVar(data.second);
     }
     for(auto data : dictionary->data.paramMap){
-    	setest.RunTest(data.second);
-    }*/
+    	setest.RunTestVar(data.second);
+    }
+    for(auto data : dictionary->data.functionMap){
+    	setest.RunTestFunc(data.second);
+    }
 }
